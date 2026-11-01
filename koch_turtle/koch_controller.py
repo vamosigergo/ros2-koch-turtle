@@ -12,6 +12,10 @@ class KochController(Node):
 
     def __init__(self):
         super().__init__('koch_controller')
+        self.order = self.declare_parameter('order', 1).value
+
+        if self.order not in range(4):
+            raise ValueError('Az order értéke 0, 1, 2 vagy 3 lehet.')
 
         self.k_linear = 1.5
         self.k_angular = 4.0
@@ -43,7 +47,7 @@ class KochController(Node):
         """Elsőrendű Koch-görbe a teknős kezdőhelyétől négy egységre jobbra."""
         start = (x, y)
         end = (x + 4.0, y)
-        points = koch_points(start, end, order=1)
+        points = koch_points(start, end, order=self.order)
         return points[1:]
 
     def control_step(self):
