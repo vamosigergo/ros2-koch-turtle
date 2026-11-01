@@ -4,6 +4,7 @@ import rclpy
 from geometry_msgs.msg import Twist
 from rclpy.node import Node
 from turtlesim.msg import Pose
+from koch_turtle.koch_geometry import koch_points
 
 
 class KochController(Node):
@@ -39,8 +40,11 @@ class KochController(Node):
         self.pose = msg
 
     def build_targets(self, x, y):
-        """Az első próbán egyetlen, jobbra lévő célpontot adunk meg."""
-        return [(x + 4.0, y)]
+        """Elsőrendű Koch-görbe a teknős kezdőhelyétől négy egységre jobbra."""
+        start = (x, y)
+        end = (x + 4.0, y)
+        points = koch_points(start, end, order=1)
+        return points[1:]
 
     def control_step(self):
         if self.pose is None:
