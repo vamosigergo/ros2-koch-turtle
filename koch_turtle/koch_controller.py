@@ -13,6 +13,7 @@ class KochController(Node):
     def __init__(self):
         super().__init__('koch_controller')
         self.order = self.declare_parameter('order', 1).value
+        self.shape = self.declare_parameter('shape', 'curve').value
 
         if self.order not in range(4):
             raise ValueError('Az order értéke 0, 1, 2 vagy 3 lehet.')
@@ -44,11 +45,26 @@ class KochController(Node):
         self.pose = msg
 
     def build_targets(self, x, y):
-        """Elsőrendű Koch-görbe a teknős kezdőhelyétől négy egységre jobbra."""
-        start = (x, y)
-        end = (x + 4.0, y)
-        points = koch_points(start, end, order=self.order)
-        return points[1:]
+        """A nyitott Koch-görbe vagy a zárt Koch-hópehely célpontjai."""
+        side = 4.0
+        a = (x, y)
+        b = (x + side, y)
+
+        if self.shape == 'curve':
+           return koch_points(a, b, self.order)[1:]
+
+        if self.shape != 'snowflake':
+           raise ValueError("A shape értéke 'curve' vagy 'snowflake' lehet.")
+
+        # A harmadik csúcs az első oldal alatt van.
+        height = side * math.sqrt(3.0) / 2.0
+        c = (x + side / 2.0, y - height)
+
+        targets = []
+        for start, end in [(a, b), (b, c), (c, a)]:
+            targets.extend(koch_points(start, end, self.order)[1:])
+
+        return targets
 
     def control_step(self):
         if self.pose is None:

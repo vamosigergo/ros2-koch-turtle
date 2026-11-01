@@ -15,8 +15,16 @@ def generate_launch_description():
 
     order = ParameterValue(LaunchConfiguration('order'), value_type=int)
 
+    shape_argument = DeclareLaunchArgument(
+        'shape',
+        default_value='curve',
+        choices=['curve', 'snowflake'],
+        description='Nyitott Koch-görbe vagy zárt Koch-hópehely.',
+    )
+
     return LaunchDescription([
         order_argument,
+        shape_argument,
         Node(
             package='turtlesim',
             executable='turtlesim_node',
@@ -28,6 +36,9 @@ def generate_launch_description():
             executable='koch_controller',
             name='koch_controller',
             output='screen',
-            parameters=[{'order': order}],
+            parameters=[{
+                'order': order,
+                'shape': LaunchConfiguration('shape'),
+            }],
         ),
     ])
